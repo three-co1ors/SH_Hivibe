@@ -1,4 +1,5 @@
 # 🤖 HiVibe — AI 기반 코드 분석 및 학습 웹 플랫폼 (진행 중)
+
 ## Hi, your code. High, your vibe.
 
 > HiVibe는 사용자가 작성한 코드를 AI가 분석하고, 더 나은 방향을 제안하는 학습형 코드 분석 플랫폼입니다.
