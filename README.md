@@ -18,7 +18,7 @@
 | 개발 기간 | 2026.03 ~ 진행 중 (졸업 프로젝트) |
 | 팀 구성 | 2인 |
 | 담당 파트 | 아이디어 제안, 분석, 노트, 마이페이지, 뱃지, 프론트엔드 일부, 배포 |
-| 배포 | Railway (운영 중) |
+| 배포 | EC2 + Nginx (hivibe.cloud) |
  
 <br>
  
@@ -26,8 +26,8 @@
  
 | 환경 | URL |
 |---|---|
-| 프론트엔드 | https://hivibe-production-a5f6.up.railway.app |
-| 백엔드 | https://hivibe-production.up.railway.app |
+| 프론트엔드 | https://hivibe.cloud |
+| 백엔드 | https://hivibe.cloud/api |
  
 <br>
  
@@ -49,8 +49,8 @@
 | Frontend | Next.js, TypeScript |
 | Database | MySQL (AWS RDS) |
 | AI | Gemini API |
-| Infra | Docker, Railway |
- 
+| Infra | EC2, Nginx, Docker, Let's Encrypt |
+
 <br>
  
 ## 📱 주요 기능
@@ -169,7 +169,20 @@ ORN_CD (원본 코드 — 사용자 입력 데이터)
 - `NEXT_PUBLIC_` 변수 빌드 시점 주입 (`ARG` / Build Arguments) 문제 해결
 - Google OAuth2 배포 환경 리디렉션 URI 등록 및 `OAuth2SuccessHandler` 환경변수 기반 처리
 - Gemini 모델 업데이트 대응 (`gemini-pro` → `gemini-1.5-flash`)
+
+=>
+
+### 7. 배포 — EC2 + Nginx + Let's Encrypt
  
+- AWS EC2 (Ubuntu 24.04 / t3.micro) 인스턴스 구성
+- Nginx 리버스 프록시 — `/api`, `/oauth2` → Spring Boot(8080), `/` → Next.js(3000)
+- Let's Encrypt SSL 인증서 발급 (certbot) — `https://hivibe.cloud`
+- 가비아 도메인 DNS A 레코드 연결, Elastic IP로 IP 고정
+- `systemd` 서비스 등록으로 서버 재시작 시 자동 실행
+- t3.micro RAM 1GB 부족 → Swap 메모리 2GB 설정으로 해결
+- `docker-compose.yml` 작성으로 로컬 전체 환경 단일 명령어 실행 가능
+- `application-prod.yml` 작성으로 배포 환경 설정 분리 (민감 정보 환경변수 처리)
+
 ---
  
 ### 8. Spring Security / CORS 정책 설정
@@ -315,7 +328,48 @@ LrnSubm → LrnBlank → Concept → Lrn → Dgns → OptCd → Anls → OrnCd
 **원인:** Next.js의 `NEXT_PUBLIC_` 접두사 변수는 런타임이 아닌 **빌드 시점**에 번들에 인라인으로 주입됨. Variables에만 추가하면 런타임 환경변수로만 등록되어 빌드된 번들에 반영되지 않음.
  
 **해결:** Dockerfile에서 `ARG NEXT_PUBLIC_API_URL` + `ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL`로 빌드 시점 주입. Railway Build Arguments에도 별도 등록.
+
+
+### 12. EC2 배포 — 메모리 부족으로 Spring Boot 실행 실패
  
+**문제:** t3.micro (RAM 1GB) 환경에서 Spring Boot 실행 직후 프로세스가 종료됨
+ 
+**원인:** Spring Boot + JPA 초기화 + MySQL 커넥션 풀이 1GB 메모리를 초과
+ 
+**해결:** Swap 메모리 2GB 설정으로 가상 메모리 확보
+```bash
+sudo fallocate -l 2G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+```
+ 
+---
+ 
+### 13. EC2 배포 — .env 파일 CRLF 줄바꿈 문제
+ 
+**문제:** Spring Boot 실행 시 `Access denied for user 'seongha SPRING_DATASOURCE_PASSWORD=비밀번호'` 에러
+ 
+**원인:** Windows에서 편집한 `.env` 파일의 줄바꿈이 `\r\n`이라 bash가 `\r`을 같은 줄로 인식해 환경변수가 붙어서 전달됨
+ 
+**해결:**
+```bash
+sed -i 's/\r//' ~/.env
+```
+ 
+---
+ 
+### 14. EC2 배포 — NEXT_PUBLIC_ 환경변수 빌드 시점 미주입
+ 
+**문제:** 배포 후 브라우저에서 `http://localhost:8080`으로 API 요청
+ 
+**원인:** Next.js의 `NEXT_PUBLIC_` 변수는 런타임이 아닌 빌드 시점에 번들에 인라인으로 삽입됨. 배포 환경 변수 미설정으로 로컬 fallback값이 사용됨
+ 
+**해결:**
+- `frontend/.env.local`에 `NEXT_PUBLIC_API_URL=https://hivibe.cloud` 추가
+- `lib/api.ts` fallback을 `'https://hivibe.cloud'`로 수정 후 재빌드
+
 <br>
  
 ## 📂 프로젝트 구조
