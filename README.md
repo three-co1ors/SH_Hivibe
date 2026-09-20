@@ -1,72 +1,187 @@
-# HiVibe 🎯
+# 🤖 HiVibe — AI 기반 코드 분석 및 학습 웹 플랫폼
 
-> Hi, your code. High, your vibe.
+## Hi, your code. High, your vibe.
 
-코드를 작성하고 AI에게 분석을 받은 뒤, 최적화된 코드로 학습까지 이어지는 올인원 코딩 성장 플랫폼입니다.
+> HiVibe는 사용자가 작성한 코드를 AI가 분석하고, 더 나은 방향을 제안하는 학습형 코드 분석 플랫폼입니다.
 
----
+<br>
 
+<img src="https://img.shields.io/badge/Java_21-0087c1?style=flat-square&logoColor=white"/> <img src="https://img.shields.io/badge/Spring%20Boot-6DB33F?style=flat-square&logo=springboot&logoColor=white"/> <img src="https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=nextdotjs&logoColor=white"/> <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white"/> <img src="https://img.shields.io/badge/MySQL-4479A1?style=flat-square&logo=mysql&logoColor=white"/> <img src="https://img.shields.io/badge/Gemini%20API-4285F4?style=flat-square&logo=google&logoColor=white"/>
+
+<br>
+
+
+## 📌 프로젝트 개요
+ 
+| 항목 | 내용 |
+|------|------|
+| 개발 기간 | 2026.03 ~ 진행 중 (졸업 프로젝트) |
+| 팀 구성 | 2인 |
+| 담당 파트 | 아이디어 제안, 분석, 노트, 마이페이지, 뱃지, 프론트엔드 일부, 배포 |
+| 배포 | EC2 + Nginx (hivibe.cloud) |
+
+> **주요 기여:** Gemini API 기반 코드 진단, AI 응답 정형화, DB/진단·노트·마이페이지·뱃지 API, 사용자 활동 로그, 일부 프론트엔드, EC2 배포를 담당했습니다.
+ 
+<br>
+ 
 ## 🔗 배포 URL
-
+ 
 | 환경 | URL |
 |---|---|
-| 프론트엔드 | https://hivibe-production-a5f6.up.railway.app |
-| 백엔드 | https://hivibe.cloud |
-
----
-
+| 프론트엔드 | https://hivibe.cloud |
+| 백엔드 | https://hivibe.cloud/api |
+ 
+<br>
+ 
+## 📎 설계 문서
+ 
+| 문서 | 링크 |
+|------|------|
+| 🎨 화면 설계서 (Figma) | [바로가기](https://www.figma.com/design/4POXDn7CeHOPoGyaPHza7B/%ED%99%94%EB%A9%B4-%EC%84%A4%EA%B3%84%EC%84%9C?node-id=0-1&t=CuXokuIMxTU2mhj1-1) |
+| 🗄 ERD | [바로가기](https://www.erdcloud.com/d/7p4ndiNspQ76nMNAj) |
+| 📋 API 명세서 | [바로가기](https://docs.google.com/spreadsheets/d/1NIX6SB2AjMwW5NXItQIA8Zd82Yj1FIDMqxP3N-ghlMY/edit?gid=0#gid=0) |
+ 
+<br>
+ 
 ## 🛠 기술 스택
+ 
+| 구분 | 기술 |
+|------|------|
+| Backend | Java 21, Spring Boot |
+| Frontend | Next.js, TypeScript |
+| Database | MySQL (AWS RDS) |
+| AI | Gemini API |
+| Infra | EC2, Nginx, Docker, Let's Encrypt |
 
-### Frontend
-- Next.js 16 / React / TypeScript
-- Tailwind CSS / shadcn/ui
-- prism-react-renderer (코드 하이라이팅)
+<br>
+ 
+## 📱 주요 기능
+ 
+- **코드 진단** — 코드 입력 → Gemini API 분석 → 점수(S/A/B/C/F) + 4가지 항목별 피드백 + 최적화 코드 제공
+- **진단 이력** — 이전 진단 불러오기 (원본 코드 + AI 분석 결과 복원) / 목록 및 상세 조회 / 삭제
+- **노트** — 학습 내용 자유 기록 (CRUD), 즐겨찾기, 태그, 학습 노트 / 자유 노트 구분
+- **마이페이지** — 프로필, 진단 횟수·평균 등급 통계, 활동 로그 기반 연속 활동 일수(streak), 뱃지 시스템
+- **뱃지** — 진단/학습/노트 활동 기반 13종 뱃지 자동 지급 및 획득 팝업
+<br>
+ 
+## 👩‍💻 박성하(three-co1ors) 담당 파트
+ 
+### 1. Gemini API 연동 — 비정형 AI 응답의 정형화 및 외부 API 통신 설계
+ 
+```
+사용자 코드 입력
+    ↓
+[Spring Boot] 프롬프트 조립 (언어, 코드, 분석 기준)
+    ↓
+[Gemini API] 분석 결과 반환
+    ↓
+응답 파싱 → 정확성 / 효율성 / 가독성 / 스타일 점수 + 항목별 피드백 + 최적화 코드
+    ↓
+DB 저장 (ORN_CD → ANLS → OPT_CD 순차 저장, @Transactional)
+```
+ 
+- XML 태그 기반 출력 형식을 프롬프트에 명시하여 비정형 AI 응답을 정형화, 파싱 안정성 확보
+- 언어별 분석 기준 프롬프트 커스터마이징
+- `temperature: 0.0` 설정으로 동일 코드 재분석 시 일관된 점수 응답 확보
+- `AiResponseDto` — 12개 필드 record, `getGrade()`로 totalScore → S/A/B/C/F 변환
+- Gemini API 지연/장애 시 DB 커넥션 고갈 방지를 위해 API 호출 타임아웃 설정 및 예외 핸들링 적용
+- 프론트엔드에서 `AbortController` 기반 분석 취소 기능 구현 (진행 중 요청 중단)
+- AI가 반환한 점수를 그대로 사용하지 않고 서버에서 `0~100` 범위로 보정한 뒤 가중치 기반 총점 재계산
+  - 정확성 40% / 효율성 30% / 가독성 15% / 스타일 15%
+- 특정 항목 점수가 기준 이하일 경우 추가 패널티를 적용하여 비정상적으로 높은 총점 방지
+- `summary`, 평가 사유, 시간복잡도 등 누락/비정상 응답에 대한 기본값 처리
+- 실제 코드에서 확인 가능한 문제만 지적하도록 프롬프트를 보강하고, 동일 원인의 중복 감점 방지
+- 가독성(readability)과 스타일(style)의 평가 기준을 분리하여 네이밍 이슈 중복 감점 방지
+- Gemini Raw 응답과 서버 정규화 결과를 로그로 비교할 수 있도록 디버깅 로그 추가
+---
+ 
+### 2. DB 설계 — 확장성을 고려한 AI 데이터 분리 아키텍처
+ 
+```
+ORN_CD (원본 코드 — 사용자 입력 데이터)
+  └── ANLS (AI 분석 결과 — 4항목 점수 + reason + totalScore)
+        └── OPT_CD (AI 최적화 코드 + 설명)
+              └── DGNS (User ↔ Anls 연결 — 유저별 진단 이력 추적)
+```
+ 
+원본 데이터(사용자 입력)와 AI 생성 데이터(분석 결과, 최적화 코드)를 테이블 단계별로 분리하여 이력 독립 조회 및 재분석이 가능하도록 설계. 추후 AI 모델 변경 시 ANLS/OPT_CD만 교체하면 되는 확장성을 고려.
+ 
+`DGNS` 테이블은 뱃지 시스템의 유저별 진단 횟수 집계와 언어 다양성 추적에 활용. 연속 활동 일수는 진단/학습 저장 로직과 분리된 `UserActivityLog`를 기준으로 계산하도록 개선.
+ 
+---
+ 
+### 3. 진단 API
+ 
+- `POST /diagnosis` — 진단 결과 저장 (`DiagnosisService`, `@Transactional`)
+- `GET /diagnosis` — 진단 목록 조회 (`DiagnosisListItemDto`)
+- `GET /diagnosis/{id}` — 진단 상세 조회 + AI 분석 결과 복원 (`DiagnosisDetailDto`)
+- `DELETE /diagnosis/{id}` — 진단 삭제 (연관 Lrn/LrnBlank/LrnSubm/OptCd/Anls/OrnCd 순차 삭제)
+---
+ 
+### 4. 마이페이지 API
+ 
+- `GET /mypage/profile` — 프로필 + 진단 횟수 + 평균 등급 포함 응답 (`MypageService`, `DgnsRepository`)
+- `PATCH /mypage/profile` — 프로필 이미지 / 닉네임 수정
+- `PATCH /mypage/phone` — 휴대폰 번호 저장
+- `PATCH /mypage/settings` — 복습 알림 / 마케팅 수신 동의 설정 저장
+- 프로필 이미지 정적 파일 서빙 (`WebConfig.java` 리소스 핸들러 설정)
+---
+ 
+### 5. 사용자 활동 로그 — 기능 저장 로직과 행동 추적 분리
 
-### Backend
-- Spring Boot 3 / Java 21
-- Spring Security / JWT
-- JPA / MySQL
-- Google Gemini API
+```text
+AI 진단 성공
+    ↓
+DIAGNOSIS_COMPLETED
 
-### Infrastructure
-- AWS RDS (MySQL)
-- Railway (배포)
-- Docker
+학습 생성 완료
+    ↓
+LEARNING_COMPLETED
+
+UserActivityLog
+    ↓
+마이페이지 연속 활동 일수 계산 / 추후 사용자 행동 분석
+```
+
+- `UserActivityLog` 엔티티를 별도로 설계하여 진단/학습 데이터와 사용자 행동 로그를 분리
+- `user_id`, `event_type`, `created_at` 기반으로 최소한의 활동 정보만 기록
+- `POST /api/activity?eventType=...` 형태의 활동 기록 API 구현
+- 진단 결과 자체를 자동 저장하지 않고 활동 로그만 남겨 기존 진단 횟수, 티어, 뱃지 조건에 영향을 주지 않도록 설계
+- 같은 날 진단/학습을 여러 번 수행해도 날짜를 `Set`으로 중복 제거하여 연속 활동 일수는 하루로 계산
+- 향후 AI 기능 사용 흐름, 사용자 이탈 구간, 기능별 사용 빈도 분석을 위한 로그 기반 마련
 
 ---
 
-## ✨ 주요 기능
-
-### 🔍 코드 진단
-- Java, Python, JavaScript, TypeScript, C, C++ 6개 언어 지원
-- Google Gemini AI 기반 코드 분석
-- 정확성 / 효율성 / 가독성 / 스타일 4개 항목 점수 및 등급(S/A/B/C/F) 제공
-- 시간복잡도 분석 및 개선 방안 제시
-- 최적화 코드 자동 생성
-- 이전 진단 기록 불러오기 및 삭제
-
-### 📚 코드 학습
-- 진단 결과 기반 AI 학습 세션 자동 생성
-- 최적화 코드의 핵심 부분을 빈칸으로 제공하는 빈칸 채우기 방식
-- 힌트 시스템 및 AI 채점 기능
-- 학습 개념 설명 제공
-
-### 📝 노트
-- 학습 완료 후 노트 자동 저장 (학습 노트)
-- 직접 작성하는 자유 노트
-- 즐겨찾기 / 태그 / 언어별 필터링
-- 코드 스냅샷 저장 및 syntax highlighting
-
-### 🏆 뱃지 시스템
-총 13종의 뱃지 획득 가능
-
+### 6. 노트 API
+ 
+| 기능 | 메서드 | 설명 |
+|------|--------|------|
+| 노트 생성 | POST | 제목 + 내용(LONGTEXT) + 태그 저장 (학습 노트 / 자유 노트 구분) |
+| 노트 목록 조회 | GET | 전체 / 타입별 (LEARNING, MANUAL) / 즐겨찾기 필터 |
+| 노트 단건 조회 | GET | 상세 조회 (AI 요약 포함) |
+| 노트 수정 | PATCH | 낙관적 업데이트 |
+| 노트 삭제 | DELETE | |
+| 즐겨찾기 | PATCH | 토글 |
+ 
+- `OPT_CD_ID nullable = true` 처리로 학습 노트 / 자유 노트 동시 지원
+ 
+---
+ 
+### 7. 뱃지 시스템
+ 
+- 총 13종 뱃지 설계 및 구현 (진단 8종 + 노트 2종 + 학습 3종)
+- 뱃지 조건 체크 및 자동 지급 (`BadgeService.checkAndAward()`, `checkAndAwardWithLearning()`)
+- `DgnsRepository` 커스텀 JPQL 쿼리로 유저별 최고 점수, 언어 DISTINCT, 진단 횟수 집계
+- 진단 저장 / 노트 저장 / 학습 완료 직후 자동 뱃지 체크 트리거
+- `newlyAchieved` 필드로 신규 획득 뱃지 식별 → 프론트 획득 팝업 연동
+ 
 | 카테고리 | 뱃지 | 조건 |
 |---|---|---|
 | 진단 | 🔍 First Scan | 첫 진단 완료 |
 | 진단 | ⚡ Speed Optimizer | 90점 이상 달성 |
 | 진단 | 💯 Perfectionist | 100점 달성 |
 | 진단 | 🏆 Grade S | S등급 달성 |
-| 진단 | 🌐 Polyglot | 3개 이상 언어로 분석 |
+| 진단 | 🌐 Polyglot | 3개 이상 언어 분석 |
 | 진단 | 🔥 On Fire | 7일 연속 분석 |
 | 진단 | 📅 Consistent | 30일 연속 분석 |
 | 진단 | 🎖️ Code Veteran | 진단 50회 이상 |
@@ -75,47 +190,322 @@
 | 학습 | 🎓 First Learner | 첫 학습 완료 |
 | 학습 | ✨ Perfect Answer | 빈칸 채우기 100% 정답 |
 | 학습 | 💪 Study Hard | 학습 10회 완료 |
+ 
+---
+ 
+### 8. 배포 — EC2 + Nginx + Let's Encrypt
+ 
+- AWS EC2 (Ubuntu 24.04 / t3.micro) 인스턴스 구성
+- Nginx 리버스 프록시 — `/api`, `/oauth2` → Spring Boot(8080), `/` → Next.js(3000)
+- Let's Encrypt SSL 인증서 발급 (certbot) — `https://hivibe.cloud`
+- 가비아 도메인 DNS A 레코드 연결, Elastic IP로 IP 고정
+- `systemd` 서비스 등록으로 서버 재시작 시 자동 실행
+- t3.micro RAM 1GB 부족 → Swap 메모리 2GB 설정으로 해결
+- `docker-compose.yml` 작성으로 로컬 전체 환경 단일 명령어 실행 가능
+- `application-prod.yml` 작성으로 배포 환경 설정 분리 (민감 정보 환경변수 처리)
 
-### 👤 마이페이지
-- 프로필 사진 / 이름 수정
-- 티어 시스템 (Bronze → Silver → Gold → Platinum → Diamond)
-- 진단 통계 (총 진단 수, 평균 등급)
-- 획득한 뱃지 목록
-- 최근 학습 노트 히스토리
-- 휴대폰 번호 등록
-- 알림 설정 / 마케팅 수신 동의
+---
+ 
+### 9. Spring Security / CORS 정책 설정
+ 
+- RESTful API 설계에 맞게 CORS 허용 메서드에 `PATCH` 추가 (`SecurityConfig`)
+- 401/403 응답을 OAuth2 리다이렉트 대신 JSON으로 반환하여 클라이언트 에러 처리 일관성 확보
+- 배포 환경 도메인 CORS 허용 목록 추가
+---
+ 
+### 10. 프론트엔드 — Next.js
+ 
+- 모놀리식 `LeetCodeIDE.tsx` → 기능별 컴포넌트 분리 리팩터링
+- `prism-react-renderer` 기반 syntax highlighting (Java/Python/JS/TS/C/C++ 6개 언어)
+- `AbortController` 기반 AI 분석 취소 기능
+- 진단 패널 — `getComplexityData()`로 Big-O 기반 시간복잡도 그래프 시각화
+- 이전 진단 불러오기 다이얼로그 (`LoadDiagnosisDialog`) — 원본 코드 + AI 분석 결과 동시 복원
+- 진단 저장 다이얼로그 리디자인 — 등급/점수 미리보기 카드, 4개 항목 점수 칩 표시
+- 뱃지 언락 팝업 (`newlyAchieved` 필드명으로 Jackson 직렬화 충돌 해결)
+- 마이페이지 프로필 / 통계 / 뱃지 화면 — 실제 API 연동
+- 노트 편집 모드 + 즐겨찾기 낙관적 업데이트
+- 노트 삭제 / 진단 삭제 `AlertDialog` 적용
+- 태그 입력 칩(Chip) 기반 UX
+- 클라이언트 사이드 auth guard (메인 페이지)
+- 사이드바 닉네임 동기화 (`refreshKey` 패턴)
+- 전역 한글 폰트 fix — Pretendard를 CSS 변수 스택(`font-syne`, `font-space`) fallback으로 추가
+- 랜딩 페이지 코드 프리뷰 — Prism 기반 `MiniCodeBlock` 컴포넌트 구현
+- 회원가입 성공 후 자동 로그인 → `/main` 바로 이동
+- 마이페이지 연속 활동 일수(streak) API 연동 및 통계 카드 표시
+- AI 진단 성공 시 `DIAGNOSIS_COMPLETED`, 학습 생성 완료 시 `LEARNING_COMPLETED` 활동 로그 기록
+<br>
+ 
+## 🔧 트러블슈팅
+ 
+### 1. 비정형 AI 응답 데이터의 정형화 및 파싱 안정성 확보
+ 
+**문제:** Gemini API 응답 형식이 요청마다 달라 파싱 실패 반복 발생.
+ 
+**원인:** LLM은 본질적으로 비정형 텍스트를 반환하기 때문에, 별도의 출력 형식 강제 없이는 응답 구조가 일관되지 않음.
+ 
+**해결:** 프롬프트에 XML 태그 기반 출력 형식을 명시하여 파싱 가능한 정형 응답 구조를 강제. 이후 파싱 실패율이 크게 감소.
+ 
+---
+ 
+### 2. 외부 API(Gemini) 지연 시 DB 커넥션 고갈 위험 방지
+ 
+**문제:** Gemini API 응답이 장시간 지연될 경우, `@Transactional` 내에서 DB 커넥션을 계속 점유하여 전체 서버 응답성이 저하될 수 있음.
+ 
+**원인:** AI API 호출과 DB 저장 로직이 동일 트랜잭션 안에 묶여 있어, 외부 API 지연이 곧 커넥션 풀 고갈로 이어지는 구조적 위험 존재.
+ 
+**해결:** Gemini API 호출에 타임아웃을 설정하고, API 호출 실패 시 예외를 명시적으로 처리하여 트랜잭션이 불필요하게 길어지지 않도록 제어.
+ 
+---
+ 
+### 3. 대용량 텍스트(코드 및 마크다운) 처리를 위한 DB 스키마 최적화
+ 
+**문제:** 코드가 포함된 긴 노트 저장 시 truncation 오류 발생.
+ 
+**원인:** `note_cn` 컬럼이 `TINYTEXT`(최대 255 bytes)로 설정되어 있었고, 코드 스니펫이나 마크다운을 포함한 노트 특성상 255자를 쉽게 초과.
+ 
+**해결:** `LONGTEXT`로 변경하여 최대 4GB까지 저장 가능하도록 스키마 수정.
+ 
+```sql
+ALTER TABLE note MODIFY COLUMN note_cn LONGTEXT;
+```
+ 
+---
+ 
+### 4. Spring Security와 RESTful API의 CORS 정책 정교화
+ 
+**문제:** 노트 수정 요청(PATCH)에서만 CORS 오류 발생.
+ 
+**원인:** Spring Security CORS 설정의 허용 메서드 목록이 `GET`, `POST`, `DELETE`만 포함하고 있었고, RESTful 설계상 수정 작업에 사용한 `PATCH`가 누락되어 있었음.
+ 
+**해결:** `SecurityConfig`의 CORS 허용 메서드에 `PATCH` 추가.
+ 
+---
+ 
+### 5. ObjectMapper 빈 설정 오류로 인한 LocalDateTime 직렬화 실패
+ 
+**문제:** 날짜 필드가 포함된 API 응답에서 직렬화 실패.
+ 
+**원인:** `AppConfig.java`에서 `new ObjectMapper()`로 빈을 직접 생성하였고, 이 경우 Spring Boot의 자동 설정이 적용되지 않아 `JavaTimeModule`이 미등록 상태로 동작.
+ 
+**해결:** `ObjectMapper` 빈에 `JavaTimeModule`을 명시적으로 등록.
+ 
+---
+ 
+### 6. 뱃지 언락 팝업 — Jackson boolean 직렬화 충돌
+ 
+**문제:** 뱃지 언락 여부를 나타내는 필드가 항상 `false`로 반환.
+ 
+**원인:** `isNew`로 필드명을 지정할 경우, Jackson이 `boolean` 타입의 getter(`isNew()`)를 `new` 필드로 잘못 매핑하는 직렬화 충돌 발생.
+ 
+**해결:** 필드명을 `newlyAchieved`로 변경하여 Jackson의 getter 네이밍 컨벤션 충돌 회피.
+ 
+---
+ 
+### 7. 전역 한글 폰트 일관성 확보 — CSS 변수 스택 fallback 설계
+ 
+**문제:** 배포 후 일부 컴포넌트에서 한글이 시스템 기본 폰트로 표시.
+ 
+**원인:** `font-syne`, `font-space` 등 CSS 변수로 선언된 폰트 스택에 한글 폰트 fallback이 누락되어, 해당 변수를 사용하는 컴포넌트에서 한글을 렌더링할 수 없었음.
+ 
+**해결:** `globals.css`에서 모든 폰트 변수 스택에 Pretendard를 fallback으로 추가. 컴포넌트별 개별 수정 없이 전역 적용.
+ 
+---
+ 
+### 8. 사이드바 닉네임 미동기화 — 컴포넌트 간 상태 공유 패턴
+ 
+**문제:** 마이페이지에서 닉네임 수정 후 사이드바에 즉시 반영되지 않음.
+ 
+**원인:** 사이드바와 마이페이지가 별도 컴포넌트로 분리되어 있어, 마이페이지의 수정 완료 이벤트가 사이드바에 전달되지 않음.
+ 
+**해결:** `refreshKey` 상태를 공통 상위 컴포넌트에서 관리하고, 프로필 수정 완료 시 `refreshKey`를 갱신하여 사이드바를 강제 리렌더링.
+ 
+---
+ 
+### 9. 진단 삭제 시 연관 데이터 순서 의존성 — FK 제약조건 위반
+ 
+**문제:** 진단 삭제 시 `Cannot delete or update a parent row: a foreign key constraint fails` 오류 발생.
+ 
+**원인:** 진단(DGNS) → 학습(LRN) → 제출이력(LRN_SUBM), 빈칸(LRN_BLANK) 등 FK로 연결된 테이블이 있어, 부모 레코드를 먼저 삭제하면 자식 레코드가 참조 무결성을 위반.
+ 
+**해결:** 삭제 순서를 자식 → 부모 순으로 명시적 제어.
+```
+LrnSubm → LrnBlank → Concept → Lrn → Dgns → OptCd → Anls → OrnCd
+```
+ 
+---
+ 
 
-### 🔐 인증
-- 이메일 / 비밀번호 로그인 및 회원가입
-- Google / GitHub 소셜 로그인 (OAuth2)
-- JWT 기반 인증
+### 10. EC2 배포 — 메모리 부족으로 Spring Boot 실행 실패
+ 
+**문제:** t3.micro (RAM 1GB) 환경에서 Spring Boot 실행 직후 프로세스가 종료됨
+ 
+**원인:** Spring Boot + JPA 초기화 + MySQL 커넥션 풀이 1GB 메모리를 초과
+ 
+**해결:** Swap 메모리 2GB 설정으로 가상 메모리 확보
+```bash
+sudo fallocate -l 2G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+```
+ 
+---
+ 
+### 11. EC2 배포 — .env 파일 CRLF 줄바꿈 문제
+ 
+**문제:** Spring Boot 실행 시 `Access denied for user 'seongha SPRING_DATASOURCE_PASSWORD=비밀번호'` 에러
+ 
+**원인:** Windows에서 편집한 `.env` 파일의 줄바꿈이 `\r\n`이라 bash가 `\r`을 같은 줄로 인식해 환경변수가 붙어서 전달됨
+ 
+**해결:**
+```bash
+sed -i 's/\r//' ~/.env
+```
+ 
+---
+ 
+### 12. EC2 배포 — NEXT_PUBLIC_ 환경변수 빌드 시점 미주입
+ 
+**문제:** 배포 후 브라우저에서 `http://localhost:8080`으로 API 요청
+ 
+**원인:** Next.js의 `NEXT_PUBLIC_` 변수는 런타임이 아닌 빌드 시점에 번들에 인라인으로 삽입됨. 배포 환경 변수 미설정으로 로컬 fallback값이 사용됨
+ 
+**해결:**
+- `frontend/.env.local`에 `NEXT_PUBLIC_API_URL=https://hivibe.cloud` 추가
+- `lib/api.ts` fallback을 `'https://hivibe.cloud'`로 수정 후 재빌드
+
+<br>
+ 
+### 13. LLM 평가 점수 신뢰 문제 — 서버 측 정규화 및 중복 감점 방지
+
+**문제:** AI가 반환한 점수와 평가 사유가 실행마다 흔들리거나, 동일한 원인을 여러 항목에서 중복 감점하는 경우가 발생.
+
+**원인:** LLM의 평가 결과를 그대로 최종 점수로 사용하면 범위를 벗어난 값, 기준 간 중복 감점, 코드에 존재하지 않는 문제를 근거로 한 감점 가능성이 존재.
+
+**해결:** 서버에서 각 항목 점수를 `0~100` 범위로 제한하고, 정확성 40% / 효율성 30% / 가독성 15% / 스타일 15%의 가중치로 총점을 재계산. 프롬프트에도 실제 코드에서 확인 가능한 문제만 평가하고 같은 원인은 한 항목에서만 감점하도록 기준을 명시.
 
 ---
 
-## 📁 프로젝트 구조
+### 14. 연속 활동 일수와 기존 도메인 로직의 결합 문제
 
-```
-Hivibe/
-├── frontend/          # Next.js 프론트엔드
-│   ├── app/           # 페이지 라우팅
-│   ├── components/    # UI 컴포넌트
-│   └── lib/           # API 유틸리티
-└── server/            # Spring Boot 백엔드
-    └── src/main/java/com/hivibe/server/
-        ├── ai/        # Gemini AI 연동
-        ├── badge/     # 뱃지 시스템
-        ├── dgns/      # 진단 기능
-        ├── mypage/    # 마이페이지
-        ├── note/      # 노트 기능
-        ├── sign/      # 회원가입/로그인
-        └── config/    # 보안/JWT 설정
-```
+**문제:** 진단 실행만으로 streak를 증가시키기 위해 진단 데이터를 자동 저장할 경우, 기존 진단 횟수·티어·뱃지·진단 이력에 의도하지 않은 영향을 줄 수 있음.
+
+**원인:** `Dgns` 저장은 단순 로그가 아니라 사용자 등급 재계산 및 뱃지 조건과 연결된 도메인 이벤트이기 때문에 행동 추적 용도로 재사용하기 어려움.
+
+**해결:** `UserActivityLog`를 별도 도메인으로 분리하고, AI 진단 성공/학습 완료 시 활동 이벤트만 저장. 마이페이지 streak는 활동 로그의 날짜를 기준으로 계산하여 기존 진단/보상 로직과 사용자 행동 분석을 독립적으로 유지.
 
 ---
 
-## 👥 팀원 및 역할
+## 📂 프로젝트 구조
+ 
+```
+SH_Hivibe/
+├── frontend/
+│   ├── app/
+│   │   ├── features/          # 기능별 페이지
+│   │   ├── library/
+│   │   ├── login/
+│   │   ├── main/
+│   │   ├── oauth2/callback/
+│   │   ├── signup/
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   └── page.tsx
+│   ├── components/
+│   │   ├── diagnosis/         # 코드 진단 컴포넌트
+│   │   ├── dialogs/           # 뱃지 언락 등 다이얼로그
+│   │   ├── layout/
+│   │   ├── learning/
+│   │   ├── mypage/            # 마이페이지 컴포넌트
+│   │   ├── notes/             # 노트 컴포넌트
+│   │   ├── shared/
+│   │   ├── ui/
+│   │   ├── leetcode-ide.tsx   # 코드 에디터 (리팩토링 대상)
+│   │   └── theme-provider.tsx
+│   ├── hooks/
+│   ├── lib/
+│   ├── public/
+│   ├── styles/
+│   └── types/
+│
+└── server/
+    └── src/main/java/com/hivibe/server/ # 각 폴더에 (controller, dto, service)
+        ├── activity/          # 사용자 활동 로그 / streak
+        ├── ai/                # Gemini API 연동
+        ├── badge/             # 뱃지 시스템
+        ├── config/            # Spring 설정
+        ├── dgns/              # 진단 (Diagnosis)
+        ├── domain/            # 공통 도메인
+        ├── lrn/               # 학습 (Learning)
+        ├── mypage/            # 마이페이지
+        ├── note/              # 노트
+        ├── repository/        # DB 접근
+        ├── sign/              # 인증
+        └── ServerApplication.java
+```
+ 
+## 🗄 DB 설계
+ 
+**핵심 테이블 구조**
+ 
+```
+users
+  - user_id, email, name, profile_image, review_alarm_yn
+ 
+ORN_CD (원본 코드)
+  - orn_cd_id, user_id, code, language, created_at
+ 
+ANLS (분석 결과)
+  - anls_id, orn_cd_id, total_score
+  - accuracy_score, accuracy_reason
+  - efficiency_score, efficiency_reason
+  - readability_score, readability_reason
+  - style_score, style_reason
+  - created_at
+ 
+OPT_CD (최적화 코드)
+  - opt_cd_id, anls_id, optimized_code, explanation
+ 
+DGNS (진단 이력 — User ↔ Anls 연결)
+  - dgns_id, user_id, anls_id, dgns_nm, dgns_dt
+ 
+notes
+  - note_id, user_id, opt_cd_id (nullable), title, note_cn (LONGTEXT), is_favorite, tags, created_at, updated_at
+ 
+badges
+  - badge_id, user_id, badge_key, achieved_at
+  - UNIQUE (user_id, badge_key)
 
-| 이름 | 역할 |
-|---|---|
-| 박성하 | 백엔드/프론트엔드 (진단, 노트, 뱃지, 마이페이지, 배포) |
-| 안지우 | 백엔드/프론트엔드 (학습, 티어, 로그인, 인증) |
+user_activity_log
+  - id, user_id, event_type, created_at
+  - 진단/학습 활동 기록 및 streak 계산
+```
+ 
+> **3-테이블 저장 플로우 설계 의도:**  
+> 원본 데이터(사용자 입력)와 AI 생성 데이터(분석 결과, 최적화 코드)를 테이블 단계별로 분리.
+> 이력 독립 조회 및 재분석이 가능하며, 추후 AI 모델 변경 시 ANLS/OPT_CD 레이어만 교체하면 되는 확장성을 고려한 구조.
+ 
+<br>
+ 
+<br>
+ 
+## 🚀 실행 방법
+ 
+**Backend**
+```bash
+cd server
+./gradlew bootRun
+```
+ 
+**Frontend**
+```bash
+cd frontend
+npm install
+npm run dev
+```
+ 
+**Docker (전체 환경)**
+```bash
+docker compose up --build
+```
