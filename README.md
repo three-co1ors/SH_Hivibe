@@ -28,7 +28,7 @@
  
 | 환경 | URL |
 |---|---|
-| 프론트엔드 | https://hivibe.cloud |
+| 프론트엔드 | [https://hivibe.cloud](https://www.hivibe.cloud/) |
 | 백엔드 | https://hivibe.cloud/api |
  
 <br>
