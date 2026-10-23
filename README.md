@@ -1,4 +1,5 @@
 # 🤖 HiVibe — AI 기반 코드 분석 및 학습 웹 플랫폼
+https://www.hivibe.cloud/
 
 ## Hi, your code. High, your vibe.
 
